@@ -14,7 +14,7 @@ module.exports = {
   async getSingleUser(req, res) {
     try {
       const user = await User.findOne({ _id: req.params.userId })
-        .select('-__v');
+        // .select('-__v');
 
       if (!user) {
         return res.status(404).json({ message: 'No user with that ID' });
@@ -43,8 +43,8 @@ module.exports = {
         return res.status(404).json({ message: 'No user with that ID' });
       }
       // Delete associated thoughts
-      await Thought.deleteMany({ username: user.user });
-
+      await Thought.deleteMany({ username: user.userName });
+      res.json({ message: 'User and associated thoughts deleted!' })
     } catch (err) {
       res.status(500).json(err);
     }
@@ -74,7 +74,7 @@ module.exports = {
     try {
       const user = await User.findOneAndUpdate(
         { _id: req.params.userId },
-        { $addToSet: { friends: req.params.friendId } },
+        { $addToSet: { friends: req.params.friendsId } },
         { new: true }
       );
 
@@ -93,7 +93,7 @@ module.exports = {
     try {
       const user = await User.findByIdAndUpdate(
         { _id: req.params.userId },
-        { $pull: { friends: req.params.friendId } },
+        { $pull: { friends: req.params.friendsId } },
         { new: true }
       );
 

@@ -4,7 +4,7 @@ const { Schema, model } = require('mongoose');
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const userSchema = new Schema({
-    user: {
+    userName: {
       type: String,
       unique: true,
       required: true,

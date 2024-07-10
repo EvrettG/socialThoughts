@@ -6,7 +6,7 @@ module.exports = {
     async getThoughts(req, res) {
         try {
             const thoughts = await Thought.find()
-            .populate('username', 'user');
+            .populate('username', 'userName');
             res.json(thoughts);
         } catch (err) {
             res.status(500).json(err);
@@ -17,7 +17,7 @@ module.exports = {
     async getThoughtById(req, res) {
         try {
             const thought = await Thought.findOne({ _id: req.params.thoughtId })
-            .populate('username', 'user');
+            .populate('username', 'userName');
 
             if (!thought) {
             return res.status(404).json({ message: 'No thought with that ID' });
@@ -33,6 +33,11 @@ module.exports = {
     async createThought(req, res) {
         try {
             const thought = await Thought.create(req.body);
+            // Push the new thought's ID to the associated user's thoughts field
+            await User.findOneAndUpdate(
+                { userName: req.body.username },
+                { $push: { thoughts: thought._id } }
+            );
             res.json(thought);
         } catch (err) {
             res.status(500).json(err);
@@ -76,19 +81,20 @@ module.exports = {
     // Post a reaction to a thought
     async addReaction(req, res) {
         try {
-            const thought = await Thought.findOneAndUpdate(
+          const thought = await Thought.findOneAndUpdate(
             { _id: req.params.thoughtId },
             { $push: { reactions: req.body } },
             { new: true, runValidators: true }
-            );
-
-            if (!thought) {
+          );
+    
+          if (!thought) {
             return res.status(404).json({ message: 'No thought with that ID' });
-            }
-
-            res.json(thought);
+          }
+    
+          res.json(thought);
         } catch (err) {
-            res.status(500).json(err);
+          console.error('Error posting reaction:', err); // Log the error for debugging
+          res.status(500).json({ message: 'An error occurred while posting the reaction.', error: err.message });
         }
     },
 
